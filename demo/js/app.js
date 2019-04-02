@@ -1,5 +1,5 @@
-var client = algoliasearch("UQ5V1RCRHZ", "625dc522ad32d77e986d35fc93081394")
-var players = client.initIndex('shop_belgique_lilian');
+var client = algoliasearch('YourApplicationID', 'YourSearchAPIKey')
+var players = client.initIndex('INDEX_NAME');
 
 autocomplete('#aa-search-input', {}, [
     {
