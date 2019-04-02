@@ -1,1 +1,1 @@
-"# demo-algolia" 
+#  Demo Algolia
