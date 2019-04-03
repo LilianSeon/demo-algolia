@@ -125,27 +125,6 @@
 }
 </style>
 <body>
-<?php
-
-require __DIR__ . '/autoload.php';
-
-// if you are not using composer
-// require_once 'path/to/algolia/folder/autoload.php';
-
-/*
- *
- * /!\ If you want the API Keys ask to lilian.seon@orange.com /!\
- * 
- */
-
-$client = Algolia\AlgoliaSearch\SearchClient::create(
-  'YourApplicationID',
-  'YourWriteAPIKey'
-);
-
-$index1 = "INDEX_NAME";
-
-?>
 <!-- MENU -->
 <header role="banner">
     <nav class="navbar navbar-dark bg-dark navbar-expand-md">
@@ -160,7 +139,6 @@ $index1 = "INDEX_NAME";
                     <li class="nav-item"><a class="nav-link" href="../demo">Shop</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">My Orange</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">Help</a></li>
-                    <li class="nav-item float-right"><a href="#" class="nav-link">Index : <?= $index1; ?></a></li>
                 </ul>
                 <ul class="navbar-nav text-white">
                     <li class="nav-item">
@@ -173,7 +151,7 @@ $index1 = "INDEX_NAME";
         </div>
     </nav>
 </header>
-<!-- Fin Menu -->
+<!-- End Menu -->
 <div class="container content">
     <div id="current-refined-values">
         <!-- CurrentRefinedValues widget will appear here -->
@@ -279,18 +257,18 @@ $index1 = "INDEX_NAME";
         </div>
     </div>
 </footer>
-<!-- Fin Footer -->
+<!-- End Footer -->
+<!-- All the library needed for UI and Algolia -->
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@3.0.0/dist/instantsearch.development.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
 <script src="js/boosted.js"></script>
 <script>
-var index = "<?php echo $index1; ?>";
 const search = instantsearch({
-  indexName: index,
+  indexName: "INDEX_NAME",
   searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
-  routing: true
+  routing: true // This will change the URL consistent with some widgets's values
 });
 
 
@@ -299,8 +277,7 @@ const search = instantsearch({
     instantsearch.widgets.pagination({
       container: '#pagination',
       maxPages: 10,
-      // default is to scroll to 'body', here we disable this behavior
-      scrollTo: 'header',
+      scrollTo: 'header', // default is to scroll to 'header', here we enable this behavior
       showFirst: false,
       showLast: false,
       showPrevious: true,
@@ -309,7 +286,7 @@ const search = instantsearch({
         previous: '',
         next: '',
       },
-      cssClasses: {
+      cssClasses: { // Add css class
         root: 'pagination justify-content-center',
         list: 'nav d-inline-flex',
         item: 'page-item text-dark',
@@ -322,11 +299,11 @@ const search = instantsearch({
     })
   );
 
+// initialize hits
 search.addWidget({
   render: function(opts) {
     const results = opts.results;
-    // read the hits from the results and transform them into HTML.
-    document.querySelector('#hits').innerHTML = results.hits.map(function(h) {
+    document.querySelector('#hits').innerHTML = results.hits.map(function(h) { // read the hits from the results and transform them into HTML.
       return `
       <div class="col-md-12">
         <div class="alert border border-secondary rounded shadow">
@@ -340,6 +317,7 @@ search.addWidget({
 });
 
 
+// initialize stats
 search.addWidget(
   instantsearch.widgets.stats({
     container: "#stats",
@@ -357,6 +335,8 @@ search.addWidget(
   })
 );
 
+
+// initialize search box
 search.addWidget({
   init: function(opts) {
     const helper = opts.helper;
@@ -368,7 +348,7 @@ search.addWidget({
   }
 });
 
-search.start();
+search.start(); // Once you have added all the wanted widgets to call the start method to actually start the search.
 </script>
 </body>
 </html>
