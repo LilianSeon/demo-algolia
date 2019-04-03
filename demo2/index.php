@@ -265,6 +265,7 @@
 <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
 <script src="js/boosted.js"></script>
 <script>
+// Connection to Algolia server where is located your index 
 const search = instantsearch({
   indexName: "INDEX_NAME",
   searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
