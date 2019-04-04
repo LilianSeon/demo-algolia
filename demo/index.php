@@ -122,29 +122,6 @@
 }
 </style>
 <body>
-<?php
-
-
-require __DIR__ . '/autoload.php';
-
-// if you are not using composer
-// require_once 'path/to/algolia/folder/autoload.php';
-
-/*
- *
- * /!\ If you want the API Keys ask to lilian.seon@orange.com /!\
- * 
- */
-
-$client = Algolia\AlgoliaSearch\SearchClient::create(
-  'YourApplicationID',
-  'YourWriteAPIKey'
-);
-
-$index1 = "INDEX_NAME";
-
-?>
-
 <!-- MENU -->
 <header role="banner">
     <nav class="navbar navbar-dark bg-dark navbar-expand-md">
@@ -172,7 +149,7 @@ $index1 = "INDEX_NAME";
         </div>
     </nav>
 </header>
-<!-- Fin Menu -->
+<!-- End Menu -->
 
 <div class="container content">
     <div id="current-refined-values">
@@ -215,7 +192,6 @@ $index1 = "INDEX_NAME";
             </div>
           </div>
         </div>
-
             <div class="col-md-12">
           <div class="card multi mt-1">
             <div class="card-header" role="tab" id="headingOne-2">
@@ -231,8 +207,6 @@ $index1 = "INDEX_NAME";
               </div>
             </div>
           </div>
-
-          
         </div>
         <div class="col-md-12 mt-3">
           <div id="hits-per-page-selector"></div>
@@ -332,7 +306,8 @@ $index1 = "INDEX_NAME";
         </div>
     </div>
 </footer>
-<!-- Fin Footer -->
+<!-- End Footer -->
+<!-- All the library needed for UI and Algolia -->
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3.32.0/dist/algoliasearchLite.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@3.0.0/dist/instantsearch.development.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -358,20 +333,22 @@ document.getElementById('btnFiltre').onclick = function(){
   document.getElementById('btnFiltre').style.opacity = "0";
 };
 
-var index = "<?php echo $index1; ?>";
+
+// Connection to Algolia server where is located your index 
 const search = instantsearch({
-  indexName: index,
+  indexName: "INDEX_NAME",
   searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
-  routing: true
+  routing: true // This will change the URL consistent with some widgets's values
 });
 
+// initialize clearRefinement widget
 search.addWidget(
   instantsearch.widgets.clearRefinements({
     container: '#clear-refinements',
     templates: {
       resetLabel: 'Vider les filtres'
     },
-    cssClasses:{
+    cssClasses:{ // Add css classes
       root: 'mb-2',
       button: 'btn btn-secondary w-100',
       disabledButton: 'disabled'
@@ -380,7 +357,7 @@ search.addWidget(
 );
 
 
-  // initialize pagination
+  // initialize pagination widget
   search.addWidget(
     instantsearch.widgets.pagination({
       container: '#pagination',
@@ -408,29 +385,17 @@ search.addWidget(
     })
   );
   
-
+// initialize Hits widget
 search.addWidget({
   render: function(opts) {
     const results = opts.results;
-    // read the hits from the results and transform them into HTML.
-    document.querySelector('#hits').innerHTML = results.hits.map(function(h) {
-      if(opts){
+    document.querySelector('#hits').innerHTML = results.hits.map(function(h) { // read the hits from the results and transform them into HTML.
         return '<div id="item'+h.idProduct+'" class="item col-md-3 col-sm-12 mb-4 border rounded  w-75" style="height:400px;padding-top:140px;"><div id="caps'+h.idProduct+'" style="height:400px;"><div id="loading'+h.idProduct+'" class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div><img src="'+h.productPictureUrl+'" class="card-img-top" onloadstart="loading('+h.idProduct+')" style="height:400px;object-fit: contain;" alt="'+h._highlightResult.title.value+'"><div class="card-body"><div class="text-muted">'+h.productBrand+'</div><hr style="border-top: 1px solid #999;"><h5 class="card-title">'+h._highlightResult.title.value+'</h5><p class="card-text"><div class="float-right text-primary font-weight-bold" style="font-size:27px;">'+h.price+'€</div></p><a href="'+h.objectID+'" class="btn btn-outline-secondary pb-1">Détail</a></div></div>';
-      }else{
-        return `<div class="alert alert-lg border border-warning alert-dismissible fade show bg-transparent" role="alert">
-        <span class="alert-icon svg-warning" aria-label="Warning"></span>
-        <div class="pl-5 font-weight-bold">
-            Your changes have been saved.
-        </div>
-        <button type="button" class="close mt-1" data-dismiss="alert" aria-label="Close">
-        <span class="text-dark" aria-hidden="true">×</span>
-        </button>
-    </div>`;
-      }
     }).join('');
   }
 });
 
+// Display a loading image while the img of the product is loading
 function loading(id){
   event.target.style.display = "none";
   event.target.addEventListener('load', function(){
@@ -442,6 +407,7 @@ function loading(id){
   });
 }
 
+// initialize Stats widget
 search.addWidget(
   instantsearch.widgets.stats({
     container: "#stats",
@@ -459,6 +425,7 @@ search.addWidget(
   })
 );
 
+// initialize RefinementList widget
 search.addWidget(
   instantsearch.widgets.refinementList({
     container: '#brands',
@@ -517,6 +484,7 @@ search.addWidget(
   })
 );
 
+// initialize Hits Per Page widget
 search.addWidget(
   instantsearch.widgets.hitsPerPage({
     container: '#hits-per-page-selector',
@@ -531,6 +499,8 @@ search.addWidget(
   })
 );
 
+
+// initialize Search Box
 search.addWidget({
   init: function(opts) {
     const helper = opts.helper;
@@ -542,7 +512,7 @@ search.addWidget({
   }
 });
 
-// Create the render function
+// Create the render function for the Range Slider widget
 const renderRangeSlider = (renderOptions, isFirstRender) => {
   const { start, range, refine, widgetParams } = renderOptions;
 
@@ -581,7 +551,7 @@ search.addWidget(
     attribute: 'price',
   })
 );
-search.start();
+search.start(); // Once you have added all the wanted widgets to call the start method to actually start the search.
 
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
