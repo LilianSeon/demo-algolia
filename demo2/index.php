@@ -8,8 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="css/boosted.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <style>
+
 .point{
   text-overflow: ellipsis !important;
   overflow : hidden;
@@ -58,6 +60,8 @@
     transform: scale(1.0);
   }
 }
+
+
 
 #btnFilter{
   opacity:0;
@@ -125,6 +129,30 @@
 }
 </style>
 <body>
+<?php
+
+/*ini_set('display_errors', 1);
+// Enregistrer les erreurs dans un fichier de log
+ini_set('log_errors', 1);
+// Nom du fichier qui enregistre les logs (attention aux droits à l'écriture)
+ini_set('error_log', dirname(__file__) . '/log_error_php.txt');
+// Afficher les erreurs et les avertissements
+
+require __DIR__ . '/autoload.php';
+
+// if you are not using composer
+// require_once 'path/to/algolia/folder/autoload.php';
+
+$client = Algolia\AlgoliaSearch\SearchClient::create(
+  'UQ5V1RCRHZ',
+  '4541ff24ddf5f209d2cec4dfe14a3f67'
+);
+
+$index1 = "";*/
+
+//$index = $client->initIndex($index1);
+?>
+
 <!-- MENU -->
 <header role="banner">
     <nav class="navbar navbar-dark bg-dark navbar-expand-md">
@@ -139,6 +167,7 @@
                     <li class="nav-item"><a class="nav-link" href="../demo">Shop</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">My Orange</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">Help</a></li>
+                    <li class="nav-item float-right"><a href="#" class="nav-link">Index : <?= $index1; ?></a></li>
                 </ul>
                 <ul class="navbar-nav text-white">
                     <li class="nav-item">
@@ -151,7 +180,8 @@
         </div>
     </nav>
 </header>
-<!-- End Menu -->
+<!-- Fin Menu -->
+
 <div class="container content">
     <div id="current-refined-values">
         <!-- CurrentRefinedValues widget will appear here -->
@@ -170,6 +200,8 @@
       </div>
       <div id="suggestion" class="col-md-10"></div>
     </div>
+
+
     <div class="row">
       <div id="stats" class=" mt-1 col-md-3 offset-md-1">
           <!-- Stat widget will appear here -->
@@ -257,19 +289,18 @@
         </div>
     </div>
 </footer>
-<!-- End Footer -->
-<!-- All the library needed for UI and Algolia -->
+<!-- Fin Footer -->
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@3.0.0/dist/instantsearch.development.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
 <script src="js/boosted.js"></script>
 <script>
-// Connection to Algolia server where is located your index 
+var index = "orange.com_fr_lilian";
 const search = instantsearch({
-  indexName: "INDEX_NAME",
-  searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
-  routing: true // This will change the URL consistent with some widgets's values
+  indexName: index,
+  searchClient: algoliasearch('UQ5V1RCRHZ', '625dc522ad32d77e986d35fc93081394'),
+  routing: true
 });
 
 
@@ -278,7 +309,8 @@ const search = instantsearch({
     instantsearch.widgets.pagination({
       container: '#pagination',
       maxPages: 10,
-      scrollTo: 'header', // default is to scroll to 'header', here we enable this behavior
+      // default is to scroll to 'body', here we disable this behavior
+      scrollTo: 'header',
       showFirst: false,
       showLast: false,
       showPrevious: true,
@@ -287,7 +319,7 @@ const search = instantsearch({
         previous: '',
         next: '',
       },
-      cssClasses: { // Add css class
+      cssClasses: {
         root: 'pagination justify-content-center',
         list: 'nav d-inline-flex',
         item: 'page-item text-dark',
@@ -300,16 +332,18 @@ const search = instantsearch({
     })
   );
 
-// initialize hits
 search.addWidget({
   render: function(opts) {
     const results = opts.results;
-    document.querySelector('#hits').innerHTML = results.hits.map(function(h) { // read the hits from the results and transform them into HTML.
+    // read the hits from the results and transform them into HTML.
+    document.querySelector('#hits').innerHTML = results.hits.map(function(h) {
       return `
       <div class="col-md-12">
-        <div class="alert border border-secondary rounded shadow">
-          <h4>${h._highlightResult.title2[0].value}</h4>
-          <p>${h._highlightResult.content.value}</p>
+        <div class="alert border border-secondary rounded shadow collapsible">
+        <div class="row">
+          <h4>${h._highlightResult.title2[0].value}</h4><i class="material-icons float-right trigger" onclick="coll(${h.lastModified})">expand_more</i>
+        </div>
+          <p id="${h.lastModified}" class="contentText" style="max-height: 76px;transition: max-height 0.5s ease-out;">${h._highlightResult.content.value}</p>
         </div>
       </div>
       `;
@@ -318,7 +352,6 @@ search.addWidget({
 });
 
 
-// initialize stats
 search.addWidget(
   instantsearch.widgets.stats({
     container: "#stats",
@@ -336,8 +369,6 @@ search.addWidget(
   })
 );
 
-
-// initialize search box
 search.addWidget({
   init: function(opts) {
     const helper = opts.helper;
@@ -349,7 +380,18 @@ search.addWidget({
   }
 });
 
-search.start(); // Once you have added all the wanted widgets to call the start method to actually start the search.
+search.start();
+
+function coll(id){ // Collapse function
+  var target = document.getElementById(id);
+  console.log(target);
+  if(target.style.maxHeight == "76px"){ // If closed
+    target.style.maxHeight = "100%";
+  }else{
+    target.style.maxHeight = "76px";
+  }
+}
+
 </script>
 </body>
 </html>
