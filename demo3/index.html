@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Test Page Algolia By Lilian</title>
+    <link rel="icon" type="image/svg" href="img/orange_logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/boosted.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<style>
+
+.point{
+  text-overflow: ellipsis !important;
+  overflow : hidden;
+  white-space : nowrap;
+  width: 200px;
+}
+
+.spinner {
+  margin: 100px auto 0;
+  width: 70px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #333;
+
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% { 
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% { 
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+
+
+#btnFilter{
+  opacity:0;
+  transition: opacity 2s ease-in-out;
+}
+#filter{
+  opacity:1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.close {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+}
+.close:hover {
+  opacity: 1;
+}
+.close:before, .close:after {
+  position: absolute;
+  left: 15px;
+  content: ' ';
+  height: 33px;
+  width: 2px;
+  background-color: #333;
+}
+.close:before {
+  transform: rotate(45deg);
+}
+.close:after {
+  transform: rotate(-45deg);
+}
+
+.rounded-pill{
+  border-radius: 50rem !important;
+}
+.rounded-pill:hover{
+  cursor: pointer;
+}
+.item{
+  box-shadow: 5px 8px 6px -6px #777;
+}
+.item:hover{
+  transform: scale(1.01, 1.01);
+  -webkit-transform: scale(1.01, 1.01);
+  transition-duration: 0.15s;
+  transition-timing-function: ease-out;
+  border: 1px solid #e0bbbb !important;
+}
+
+#hits{
+  animation: anim 1s linear;
+}
+
+@keyframes anim {
+  0%  {opacity:0;}
+  100% {opacity:1;}
+}
+
+.alert:hover{
+  transform: scale(1.01);
+}
+</style>
+<body>
+<!-- MENU -->
+<header role="banner">
+    <nav class="navbar navbar-dark bg-dark navbar-expand-md">
+        <div class="container">
+            <a class="navbar-brand" href="#"><img src="img/orange_logo.svg" alt="Back to homepage" title="Back to homepage"/></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsing-navbar" aria-controls="collapsing-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse justify-content-between collapse" id="collapsing-navbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="../demo2" aria-current="page">F.A.Q.</li>
+                    <li class="nav-item"><a class="nav-link" href="../demo">Shop</a></li>
+                    <li class="nav-item active"><a href="#" class="nav-link">BirchBox Example</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">Help</a></li>
+                    <li class="nav-item float-right"><a href="#" class="nav-link">Index : lux_lilian</a></li>
+                </ul>
+                <ul class="navbar-nav text-white">
+                    <li id="loupe" class="nav-item" onclick="coll()">
+                        <a href="#" class="nav-link icon svg-search">
+                          <i class="material-icons">search</i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<!-- Fin Menu -->
+
+<div id="collapse" class="sousMenu w-100 bg-light d-none">
+  <div class="row">
+    <div class=" form-group mx-auto mt-4 mb-5 col-md-6 d-inline-flex offset-md-3" id="aa-input-container">
+      <label for="aa-search-input" class="mt-2 mr-1">Recherche : </label>
+      <input type="search" class="form-control rounded mr-2 col-md-9 shadow-sm" id="aa-search-input" placeholder="Recherche..." name="search" style="width:420px !important;" onkeydown="displayHits()">
+    </div>
+  </div>
+</div>
+<div id="hitBox" class="w-100 hitBox position-absolute d-none shadow" style="z-index: 1;">
+  <div class="row">
+    <span class="offset-11"></span>
+    <a id="cross" href="" onclick="return false"><i class="material-icons col-md-1 mt-2">close</i></a>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 d-inline-flex">
+        <div class="col-md-4 h5 d-inline-flex">
+          Produits 
+          <div id="stats" class="ml-1">
+            <!-- Stats widget will appear here -->
+          </div>
+        </div>
+        <div class="col-md-3 offset-md-1 h5 pl-2">
+          Marques
+        </div>
+        <div class="col-md-4 h5 ml-3">
+          FAQ
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="hits" class="col-md-4 h-auto">
+        <!-- Hits widget will appear here -->
+      </div>
+      <div id="hitsMarque" class="col-md-3 offset-md-1">
+        <!-- Hits marque widget will appear here -->
+      </div>
+      <div id="faq" class="col-md-4 d-flex flex-wrap">
+        <!-- Hits FAQ widget will appear here -->
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <button id="infinite-hits" type="button" class="btn btn-secondary ml-5 my-2">Voir tous les résultats ()</button>
+      </div>
+      <div class=" offset-md-4 col-md-4">
+        <button id="infinite-faq" type="button" class="btn btn-secondary ml-5 my-2">Voir tous les résultats ()</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <h2 class="pt-4">Qu'est-ce que le Lorem Ipsum?</h2>
+    <p class="col-md-10 py-2 pr-0">
+      Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis les années 1500, quand un imprimeur anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi adapté à la bureautique informatique, sans que son contenu n'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.
+    </p>
+    <p class="col-md-10 py-2 pr-0">
+        On sait depuis longtemps que travailler avec du texte lisible et contenant du sens est source de distractions, et empêche de se concentrer sur la mise en page elle-même. L'avantage du Lorem Ipsum sur un texte générique comme 'Du texte. Du texte. Du texte.' est qu'il possède une distribution de lettres plus ou moins normale, et en tout cas comparable avec celle du français standard. De nombreuses suites logicielles de mise en page ou éditeurs de sites Web ont fait du Lorem Ipsum leur faux texte par défaut, et une recherche pour 'Lorem Ipsum' vous conduira vers de nombreux sites qui n'en sont encore qu'à leur phase de construction. Plusieurs versions sont apparues avec le temps, parfois par accident, souvent intentionnellement (histoire d'y rajouter de petits clins d'oeil, voire des phrases embarassantes).
+    </p>
+    <p class="col-md-10 py-10 pr-0">
+      Contrairement à une opinion répandue, le Lorem Ipsum n'est pas simplement du texte aléatoire. Il trouve ses racines dans une oeuvre de la littérature latine classique datant de 45 av. J.-C., le rendant vieux de 2000 ans. Un professeur du Hampden-Sydney College, en Virginie, s'est intéressé à un des mots latins les plus obscurs, consectetur, extrait d'un passage du Lorem Ipsum, et en étudiant tous les usages de ce mot dans la littérature classique, découvrit la source incontestable du Lorem Ipsum. Il provient en fait des sections 1.10.32 et 1.10.33 du "De Finibus Bonorum et Malorum" (Des Suprêmes Biens et des Suprêmes Maux) de Cicéron. Cet ouvrage, très populaire pendant la Renaissance, est un traité sur la théorie de l'éthique. Les premières lignes du Lorem Ipsum, "Lorem ipsum dolor sit amet...", proviennent de la section 1.10.32.
+    </p>
+  </div>
+</div>
+    <div class="row">
+      <div id="stats" class=" mt-1 col-md-3 offset-md-1">
+          <!-- Stat widget will appear here -->
+      </div>
+    </div>
+</div> <!-- Fin container -->
+<!-- Footer -->
+<footer class="o-footer text-white" role="contentinfo" style="background-color:#000 !important;bottom:0;left:0;right:0;clear:both;">
+    <h1 class="sr-only">footer - site map & informations</h1>
+    <div class="o-footer-top">
+        <div class="container-fluid">
+            <ul class="nav">
+                <li class="nav-item"><span class="nav-link">Follow us</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="o-footer-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3 col-sm-6">
+                    <h2>Discover</h2>
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Unde omnis istea</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Natus error sit</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Voluptatem</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Totam rem aperiam</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h2>Shop</h2>
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Natus error sit</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Unde omnis istea</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Voluptatem</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Doloremque</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Totam rem aperiam</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h2>Services</h2>
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Doloremque</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Totam rem aperiam</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h2>Support</h2>
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Doloremque</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Unde omnis istea</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Voluptatem</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="#">Totam rem aperiam</a></li>
+                    </ul>
+                </div>
+            </div>
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link text-white" href="#">Contact us</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Locate a store</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Coverage map</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Business</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Child protection</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="o-footer-bottom">
+        <div class="container-fluid">
+            <ul class="nav">
+                <li class="nav-item"><span class="nav-link text-white">© Orange 2018</span></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Jobs</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Advertise</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Terms & Conditions</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Privacy</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Cookies</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Access for all</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#">Safety online</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+<!-- Fin Footer -->
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@3.0.0/dist/instantsearch.development.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+<script src="js/boosted.js"></script>
+<script>
+// Connection to Algolia server where is located your index 
+const search = instantsearch({
+  indexName: "INDEX_NAME",
+  searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
+  routing: true // This will change the URL consistent with some widgets's values
+});
+
+ 
+const searchFAQ = instantsearch({
+  indexName: "INDEX_NAME",
+  searchClient: algoliasearch('YourApplicationID', 'YourSearchAPIKey'),
+  routing: true
+});
+
+
+
+// initialize Hits widget
+searchFAQ.addWidget({
+  render: function(opts) {
+    const results = opts.results;
+
+    if(opts.results.nbHits == 0){ // If there is no result.
+      document.getElementById('infinite-faq').classList.add('d-none');
+      document.getElementById('faq').innerHTML = '<p class="ml-3">Aucun résultat.</p>';
+    }else{
+      document.querySelector('#faq').innerHTML = results.hits.map(function(h) {
+        document.getElementById('infinite-faq').innerHTML = "Voir tous les résultats ("+opts.results.nbHits+")";
+      document.getElementById('infinite-faq').classList.remove('d-none');
+      return ` 
+      <div class="col-md-6 py-1 d-block-flex">
+      <a href="#">
+        <div class="col-md-10">
+          <img src="${h.image}" width="150" height="90">
+        </div>
+        <div class="col-md-10 mt-1">
+          ${h._highlightResult.text.value}
+        </div>
+      </a>
+      </div>
+      `;  // read the hits from the results and transform them into HTML.
+    }).join('');
+    }
+  }
+});
+
+search.addWidget({
+  render: function(opts) {
+    const results = opts.results;
+
+    if(opts.results.nbHits == 0){ // If there is no result.
+      document.getElementById('infinite-hits').classList.add('d-none');
+      document.getElementById('hits').innerHTML = '<p class="ml-2">Aucun résultat.</p>';
+    }else{
+      document.querySelector('#hits').innerHTML = results.hits.map(function(h) {
+      document.getElementById('infinite-hits').innerHTML = "Voir tous les résultats ("+opts.results.nbHits+")";
+      document.getElementById('infinite-hits').classList.remove('d-none');
+      return `
+      <div class="row mb-2 py-1 product">
+        <div class="col-md-12 d-inline-flex">
+        <div class="col-md-2">
+          <img src="${h.pictureURL}" width="40" height="70">
+        </div>
+        <div class="col-md-8 mt-2">
+          <span class="font-weight-bold">${h.brand}</span><br>
+          ${h._highlightResult.title.value}
+        </div>
+        <div class="col-md-1 mt-4">
+          <span class="font-weight-bold">${h.prix.toFixed(2)}€</span>
+        </div>
+        </div>
+      </div>
+      `;
+    }).join('');
+    }
+    
+
+  }
+});
+
+
+
+// initialize RefinementList widget
+search.addWidget(
+  instantsearch.widgets.refinementList({
+    container: '#hitsMarque',
+    attribute: 'brand',
+    operator: 'or',
+    limit: 4, // Limit of results
+    templates: {
+      noResults: '<p class="ml-2">Aucun résultat.</p>',
+      item: `
+      <a href="{{url}}" class="ml-0">
+        <div class="row mb-2 py-1">
+          <div class="col-md-12 d-inline-flex">
+          <div class="col-md-3 px-0">
+            <img src="img/logo-{{label}}.png" width="45">
+          </div>
+          <div class="col-md-8 mt-2">
+            <span>{{highlighted}}</span>
+          </div>
+          </div>
+        </div>
+      </a>
+      `,
+    },
+    cssClasses: {
+      list: "list-unstyled"
+    }
+  })
+);
+
+
+
+// initialize Stats widget
+search.addWidget(
+  instantsearch.widgets.stats({
+    container: "#stats",
+    templates: {
+      text(data) {
+      let count = '';
+      let count2 = '';
+
+      if (data.hasManyResults) {
+        count += `<small>(4 sur ${data.nbHits})</small>`;
+      } else if (data.hasOneResult) {
+        count += `<small>(1 sur ${data.nbHits})</small>`;
+      } else {
+        count += `Aucun Résultat pour ${data.query}`;
+      }
+
+      if (data.nbHits < 4) {
+        count2 += `<small>(${data.nbHits} sur ${data.nbHits})</small>`;
+      }
+
+      if (count2 != ''){
+        return `${count2}`;
+      }else{
+        return `${count}`;
+      }
+
+      },
+    },
+    cssClasses: {
+      text: 'text-secondary'
+    }
+  })
+);
+
+
+// initialize Search Box
+search.addWidget({
+  init: function(opts) {
+    const helper = opts.helper;
+    const input = document.querySelector('#aa-search-input');
+    input.addEventListener('input', function(e) {
+      helper.setQuery(e.currentTarget.value) // update the parameters
+            .search(); // launch the query
+    });
+  }
+});
+searchFAQ.addWidget({
+  init: function(opts) {
+    const helper = opts.helper;
+    const input = document.querySelector('#aa-search-input');
+    input.addEventListener('input', function(e) {
+      helper.setQuery(e.currentTarget.value) // update the parameters
+            .search(); // launch the query
+    });
+  }
+});
+
+
+// Once you have added all the wanted widgets to call the start method to actually start the search.
+search.start();
+searchFAQ.start();
+
+function coll(){ // Collapse function to manage UI
+  var loupe = document.getElementById("loupe");
+  var div = document.getElementById('collapse');
+  if(div.classList.contains('d-none')){
+    div.classList.remove("d-none");
+    document.getElementById("aa-search-input").focus();
+  }else{
+    div.classList.add("d-none");
+  }
+}
+
+function displayHits(){
+  document.getElementById('hitBox').classList.remove('d-none');
+}
+
+document.getElementById('cross').addEventListener('click', function(){ // Click on cross to close hitBox
+  document.getElementById('hitBox').classList.add('d-none');
+})
+</script>
+</body>
+</html>
